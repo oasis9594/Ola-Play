@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.dell.olaapp.MainActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/song_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/pagingLayout">
+
+    </android.support.v7.widget.RecyclerView>
+    <RelativeLayout
+        android:id="@+id/pagingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:animateLayoutChanges="true"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/first_page"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:gravity="center_horizontal"
+                    android:src="@drawable/ic_fast_rewind" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/prev_page"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:gravity="center_horizontal"
+                    android:src="@drawable/ic_keyboard_arrow_left" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cur_page"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/cur_page_text"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:gravity="center_horizontal"
+                    android:text="1"
+                    android:textSize="17sp"
+                    android:textColor="@color/purple" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/next_page"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:gravity="center_horizontal"
+                    android:src="@drawable/ic_keyboard_arrow_right" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/last_page"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:gravity="center_horizontal"
+                    android:src="@drawable/ic_fast_forward" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>
