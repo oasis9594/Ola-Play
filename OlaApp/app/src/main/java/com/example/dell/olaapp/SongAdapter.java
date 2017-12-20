@@ -59,15 +59,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         holder.authors.setText(song.getArtists());
         //Picasso.with(holder.poster.getContext()).load(song.getUrl()).error(R.drawable.noposter).into(holder.poster);
         Picasso.Builder builder = new Picasso.Builder(activity);
-        builder.listener(new Picasso.Listener() {
-            @Override
-            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                holder.poster.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.noposter));
-            }
-        });
+        builder.listener((picasso, uri, exception) -> holder.poster.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.noposter)));
         builder.downloader(new OkHttpDownloader(activity));
         builder.build().load(song.getCoverImage()).into(holder.poster);
-        holder.songLayout.setOnClickListener(v -> activity.startActivity(new Intent(activity, SongPlayer.class).putExtra("url", song.getUrl())));
+        holder.songLayout.setOnClickListener(v -> activity.startActivityForResult(new Intent(activity, SongPlayer.class).putExtra("url", song.getUrl()), 400));
     }
 
     @Override

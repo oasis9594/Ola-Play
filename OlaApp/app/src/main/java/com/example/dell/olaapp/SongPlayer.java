@@ -108,8 +108,10 @@ public class SongPlayer extends AppCompatActivity {
     private TextView txtCurrentTime, txtEndTime;
     private boolean isPlaying = false;
 
-    private static final String TAG = "MainActivity";
-
+    private static final String TAG = "SongPlayer";
+    ImageView favButton, playlist_button;
+    SongModel song;
+    boolean isFav;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,29 +119,80 @@ public class SongPlayer extends AppCompatActivity {
         TextView songname=(TextView)findViewById(R.id.song_name);
         TextView artists=(TextView)findViewById(R.id.artists);
         ImageView poster=(ImageView)findViewById(R.id.big_poster);
+        favButton = (ImageView)findViewById(R.id.fav_button);
         String url=getIntent().getExtras().getString("url");
-        Realm realm=Realm.getDefaultInstance();
-        RealmResults<SongModel> realmSong = realm.where(SongModel.class).equalTo("url", url).findAll();
-        Activity activity=this;
-        for(SongModel song:realmSong)
+        Realm realm =Realm.getDefaultInstance();
+        song = realm.where(SongModel.class).equalTo("url", url).findFirst();
+        PlayList favSongs = realm.where(PlayList.class).equalTo("name", "Favourites").findFirst();
+        RealmResults<PlayList>allsongs = realm.where(PlayList.class).findAll();
+        for(PlayList p: allsongs)
         {
-            songname.setText(song.song);
-            artists.setText(song.artists);
-            Picasso.Builder builder = new Picasso.Builder(this);
-            builder.listener(new Picasso.Listener() {
-                @Override
-                public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                    poster.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.noposter));
-                }
-            });
-            builder.downloader(new OkHttpDownloader(this));
-            builder.build().load(song.coverImage).into(poster);
+            Log.d(TAG, "all "+p.name);
         }
+        //getSupportActionBar().setTitle(song.song);
+        Activity activity=this;
+        songname.setText(song.song);
+        artists.setText(song.artists);
+        Picasso.Builder builder = new Picasso.Builder(this);
+        builder.listener((picasso, uri, exception) -> poster.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.noposter)));
+        builder.downloader(new OkHttpDownloader(this));
+        builder.build().load(song.coverImage).into(poster);
         prepareExoPlayerFromURL(Uri.parse(url));
+        isFav=false;
+        if(favSongs!=null)
+        {
+            for(SongModel s:favSongs.songs)
+                if(s.url.equals(song.url))isFav=true;
+            Log.d(TAG, "1 "+favSongs.songs.size());
+        }
+        else Log.d(TAG, "Favsongs null");
+        setFav();
+        favButton.setOnClickListener(v -> {
+            disableButton();
+            isFav=!isFav;
+            setFav();
+            enableButton();
+        });
     }
+    void setFav()
+    {
+        if(isFav) {
+            favButton.setImageResource(R.drawable.ic_fav_red);
+            try (Realm realm =Realm.getDefaultInstance()){
+                realm.executeTransaction(realm1 -> {
+                    PlayList favSongs = realm1.where(PlayList.class).equalTo("name", "Favourites").findFirst();
 
+                    if(favSongs==null) favSongs=new PlayList(song);
+                    else if(!(favSongs.songs.contains(song))) favSongs.songs.add(song);
 
+                    Log.d(TAG, favSongs.songs.toString()+" "+favSongs.songs.size());
+                    realm1.copyToRealmOrUpdate(favSongs);
+                });
+            }
+        }
+        else {
+            favButton.setImageResource(R.drawable.ic_nofav_red);
+            try (Realm realm =Realm.getDefaultInstance()){
+                realm.executeTransaction(realm1 -> {
+                    PlayList favSongs = realm1.where(PlayList.class).equalTo("name", "Favourites").findFirst();
 
+                    if(favSongs==null)favSongs=new PlayList(song);
+                    else if(favSongs.songs.contains(song)) favSongs.songs.remove(song);
+
+                    Log.d(TAG, favSongs.songs.toString()+" "+favSongs.songs.size());
+                    realm1.copyToRealmOrUpdate(favSongs);
+                });
+            }
+        }
+    }
+    void disableButton()
+    {
+        favButton.setEnabled(false);
+    }
+    void enableButton()
+    {
+        favButton.setEnabled(true);
+    }
     /**
      * Prepares exoplayer for audio playback from a remote URL audiofile. Should work with most
      * popular audiofile types (.mp3, .m4a,...)
@@ -150,7 +203,6 @@ public class SongPlayer extends AppCompatActivity {
         TrackSelector trackSelector = new DefaultTrackSelector();
 
         LoadControl loadControl = new DefaultLoadControl();
-
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
 
         String userAgent = Util.getUserAgent(this, "Ola App");
@@ -174,7 +226,6 @@ public class SongPlayer extends AppCompatActivity {
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
         MediaSource audioSource = new ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null);
         exoPlayer.addListener(eventListener);
-
         exoPlayer.prepare(audioSource);
         initMediaControls();
     }
@@ -287,6 +338,21 @@ public class SongPlayer extends AppCompatActivity {
 
         seekPlayerProgress.setMax(0);
         seekPlayerProgress.setMax((int) exoPlayer.getDuration()/1000);
+    }
 
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed");
+        Intent intent = new Intent();
+        intent.putExtra("fav", isFav);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        exoPlayer.stop();
+        exoPlayer.release();
+        super.onDestroy();
     }
 }

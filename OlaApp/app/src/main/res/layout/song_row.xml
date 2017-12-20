@@ -4,11 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="10dp"
-    android:layout_marginEnd="10dp"
-    android:layout_marginTop="10dp"
-    app:cardElevation="@dimen/cardview_default_elevation"
-    app:cardCornerRadius="6dp"
+    app:cardElevation="0dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:paddingEnd="16dp"
@@ -18,7 +14,7 @@
         android:id="@+id/song_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white">
+        android:background="#EE000000">
 
         <!-- Placeholder image to be changed -->
 
@@ -27,7 +23,7 @@
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_margin="6dp"
-            android:src="@drawable/ic_fast_forward" />
+            android:src="@drawable/ic_fast_forward_red" />
 
         <TextView
             android:id="@+id/list_song_name"
@@ -41,7 +37,7 @@
             android:paddingStart="10dp"
             android:paddingTop="2dp"
             android:text="Name"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <TextView
@@ -53,9 +49,10 @@
             android:layout_below="@+id/list_song_name"
             android:ellipsize="end"
             android:maxLines="2"
+            android:text="artists"
+            android:textColor="#d3d3d3"
             android:paddingStart="10dp"
             android:textSize="14sp" />
-
     </RelativeLayout>
 
 </android.support.v7.widget.CardView>

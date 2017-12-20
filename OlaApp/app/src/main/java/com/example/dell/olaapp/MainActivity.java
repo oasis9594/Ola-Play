@@ -1,11 +1,17 @@
 package com.example.dell.olaapp;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -39,10 +45,16 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
     List<Song> cursongs;
     LinearLayout prevPage, nextPage, curPage, firstPage, lastPage;
     TextView curPageNum;
+    ImageView favbtn;
+    AutoCompleteTextView searchView;
+    ArrayAdapter<String> searchAdapter;
+    Activity activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+        activity=this;
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
@@ -62,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
         lastPage=(LinearLayout)findViewById(R.id.last_page);
         curPageNum=(TextView)findViewById(R.id.cur_page_text);
         songList=(RecyclerView)findViewById(R.id.song_list);
+        favbtn=(ImageView)findViewById(R.id.favlist);
+        searchView=(AutoCompleteTextView)findViewById(R.id.search_songs);
+        favbtn.setOnClickListener(v -> startActivity(new Intent(this, FavActivity.class)));
         cursongs = new ArrayList<>();
         songAdapter=new SongAdapter(cursongs, this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -96,21 +111,7 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
         if(response.isSuccessful())
         {
             songs = response.body();
-            /*for(Song s:songs)
-            {
-                String u=s.getUrl();
-                try {
-                    URL url = new URL(u);
-                    HttpURLConnection ucon = (HttpURLConnection) url.openConnection();
-                    ucon.setInstanceFollowRedirects(false);
-                    URL secondURL = new URL(ucon.getHeaderField("Location"));
-                    s.setUrl(secondURL.toString());
-                } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }*/
-
-                try (Realm realm = Realm.getDefaultInstance()) {
+            try (Realm realm = Realm.getDefaultInstance()) {
                 // No need to close the Realm instance manually
                 realm.executeTransaction(realm1 -> {
                     for(Song s:songs)
@@ -121,6 +122,16 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
                     }
                 });
             }
+            String[] songArray = new String[songs.size()];
+            for(int i=0;i<songs.size();i++)
+                songArray[i]=songs.get(i).getSong();
+            searchAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, songArray);
+            searchView.setAdapter(searchAdapter);
+            searchView.setThreshold(1);
+            searchView.setOnItemClickListener((parent, view, position, id) -> {
+                Song s = songs.get(position);
+                startActivityForResult(new Intent(activity, SongPlayer.class).putExtra("url", s.getUrl()), 400);
+            });
             refreshSongs(0);
         }
     }
@@ -128,5 +139,10 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
     @Override
     public void onFailure(Call<List<Song>> call, Throwable t) {
         t.printStackTrace();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
