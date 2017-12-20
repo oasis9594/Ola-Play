@@ -1,6 +1,9 @@
 package com.example.dell.olaapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -86,7 +89,12 @@ public class FavActivity extends AppCompatActivity {
         Log.d(TAG, "onActivityResult "+ songs.size());
         songAdapter.notifyDataSetChanged();
     }
-
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -96,6 +104,7 @@ public class FavActivity extends AppCompatActivity {
             boolean isFav = data.getBooleanExtra("fav", false);
             Log.d(TAG,  "fav " + isFav);
             if(isFav) return;
+            if(!isOnline())return;
             try(Realm realm = Realm.getDefaultInstance())
             {
                 songs.clear();

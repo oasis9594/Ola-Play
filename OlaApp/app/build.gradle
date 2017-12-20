@@ -44,6 +44,3 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
     testCompile 'junit:junit:4.12'
 }
-realm {
-    syncEnabled = true;
-}

@@ -1,7 +1,10 @@
 package com.example.dell.olaapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -13,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -101,7 +105,12 @@ public class SongPlayer extends AppCompatActivity {
             Log.i(TAG,"onPositionDiscontinuity");
         }
     };
-
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
     private SeekBar seekPlayerProgress;
     private Handler handler;
     private ImageButton btnPlay;
@@ -137,8 +146,13 @@ public class SongPlayer extends AppCompatActivity {
         builder.listener((picasso, uri, exception) -> poster.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.noposter)));
         builder.downloader(new OkHttpDownloader(this));
         builder.build().load(song.coverImage).into(poster);
-        prepareExoPlayerFromURL(Uri.parse(url));
         isFav=false;
+        if(!isOnline())
+        {
+            Toast.makeText(this, "Network Error!!!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        prepareExoPlayerFromURL(Uri.parse(url));
         if(favSongs!=null)
         {
             for(SongModel s:favSongs.songs)
@@ -351,8 +365,11 @@ public class SongPlayer extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        exoPlayer.stop();
-        exoPlayer.release();
+        if(exoPlayer!=null)
+        {
+            exoPlayer.stop();
+            exoPlayer.release();
+        }
         super.onDestroy();
     }
 }

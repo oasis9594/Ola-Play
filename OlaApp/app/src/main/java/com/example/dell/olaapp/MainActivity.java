@@ -14,6 +14,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -133,11 +134,14 @@ public class MainActivity extends AppCompatActivity implements Callback<List<Son
                 startActivityForResult(new Intent(activity, SongPlayer.class).putExtra("url", s.getUrl()), 400);
             });
             refreshSongs(0);
+            //favbtn.setEnabled(true);
         }
     }
 
     @Override
     public void onFailure(Call<List<Song>> call, Throwable t) {
+        Toast.makeText(activity.getApplicationContext(), "Network Error!!!", Toast.LENGTH_LONG).show();
+        //favbtn.setEnabled(false);
         t.printStackTrace();
     }
 
